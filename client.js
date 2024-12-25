@@ -1,52 +1,59 @@
 const t = TrelloPowerUp.iframe();
 
-// Simulated locked lists (use an API or database for persistent storage)
-let lockedLists = [];
+// Initialize the Power-Up with the required capabilities
+TrelloPowerUp.initialize({
+  'list-actions': (t) => {
+    return t.list('id', 'name').then((list) => {
+      const listId = list.id;
 
-t.render(() => {
-  console.log("Power-Up loaded!");
+      // Return custom actions for the list menu
+      return [
+        {
+          text: 'Lock List',
+          callback: (t) => {
+            // Save the lock state to Trello's shared storage
+            return t.set('board', 'shared', `lock_${listId}`, true)
+              .then(() => {
+                t.alert({ message: `List "${list.name}" has been locked.` });
+              });
+          },
+        },
+        {
+          text: 'Unlock List',
+          callback: (t) => {
+            // Remove the lock state from Trello's shared storage
+            return t.set('board', 'shared', `lock_${listId}`, false)
+              .then(() => {
+                t.alert({ message: `List "${list.name}" has been unlocked.` });
+              });
+          },
+        },
+      ];
+    });
+  },
+
+  // Optional: Add a board button for debugging or viewing locked lists
+  'board-buttons': (t) => [
+    {
+      text: 'Show Locked Lists',
+      callback: (t) => {
+        return t.get('board', 'shared').then((data) => {
+          const lockedLists = Object.keys(data)
+            .filter((key) => key.startsWith('lock_') && data[key])
+            .map((key) => key.replace('lock_', ''));
+
+          if (lockedLists.length > 0) {
+            t.alert({ message: `Locked Lists: ${lockedLists.join(', ')}` });
+          } else {
+            t.alert({ message: 'No locked lists found.' });
+          }
+        });
+      },
+    },
+  ],
 });
 
-// Add list action for locking/unlocking lists
-t.set('board-buttons', [
-  {
-    icon: 'https://example.com/lock-icon.png', // Replace with your icon URL
-    text: 'Lock/Unlock List',
-    callback: (t) => {
-      return t.list('id', 'name').then((list) => {
-        const listId = list.id;
-
-        if (lockedLists.includes(listId)) {
-          // Unlock the list
-          lockedLists = lockedLists.filter((id) => id !== listId);
-          t.alert({ message: `List "${list.name}" unlocked.` });
-        } else {
-          // Lock the list
-          lockedLists.push(listId);
-          t.alert({ message: `List "${list.name}" locked.` });
-        }
-
-        return t.closePopup();
-      });
-    },
-  },
-]);
-
-// Prevent card movement into or out of locked lists
-t.set('card-buttons', [
-  {
-    text: 'Move to Another List',
-    condition: 'edit',
-    callback: (t) => {
-      return t.card('idList').then((card) => {
-        if (lockedLists.includes(card.idList)) {
-          t.alert({ message: "This list is locked. You can't move cards out of it!" });
-          return t.closePopup();
-        }
-        // Proceed with moving the card
-      });
-    },
-  },
-]);
-
-// Add additional logic for card editing (if needed)
+// Listen for the Power-Up render event to confirm initialization
+t.render(() => {
+  console.log('Power-Up has rendered.');
+});
