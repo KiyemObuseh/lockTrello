@@ -1,5 +1,5 @@
 {
-  "capabilities": ["list-actions", "board-buttons"],
+  "capabilities": ["list-actions"],
   "name": "Lock Trello",
   "description": "A Trello Power-Up that allows locking lists while still enabling card edits.",
   "author": "Kiyem Obuseh",
