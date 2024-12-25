@@ -1,38 +1,30 @@
-const t = TrelloPowerUp.iframe();
-
 // Initialize the Power-Up with the required capabilities
 TrelloPowerUp.initialize({
+  // List actions (for Lock/Unlock List functionality)
   'list-actions': (t) => {
     return t.list('id', 'name').then((list) => {
       const listId = list.id;
 
-      // Return custom actions for the list menu
       return [
         {
           text: 'Lock List',
-          callback: (t) => {
-            // Save the lock state to Trello's shared storage
+          callback: () => {
             return t.set('board', 'shared', `lock_${listId}`, true)
-              .then(() => {
-                t.alert({ message: `List "${list.name}" has been locked.` });
-              });
+              .then(() => t.alert({ message: `List "${list.name}" is now locked.` }));
           },
         },
         {
           text: 'Unlock List',
-          callback: (t) => {
-            // Remove the lock state from Trello's shared storage
+          callback: () => {
             return t.set('board', 'shared', `lock_${listId}`, false)
-              .then(() => {
-                t.alert({ message: `List "${list.name}" has been unlocked.` });
-              });
+              .then(() => t.alert({ message: `List "${list.name}" is now unlocked.` }));
           },
         },
       ];
     });
   },
 
-  // Optional: Add a board button for debugging or viewing locked lists
+  // Board buttons (optional, for debugging locked lists)
   'board-buttons': (t) => [
     {
       text: 'Show Locked Lists',
@@ -51,9 +43,4 @@ TrelloPowerUp.initialize({
       },
     },
   ],
-});
-
-// Listen for the Power-Up render event to confirm initialization
-t.render(() => {
-  console.log('Power-Up has rendered.');
 });
