@@ -1,0 +1,11 @@
+{
+  "capabilities": ["list-actions", "card-buttons"],
+  "name": "Lock List Power-Up",
+  "description": "Allows you to lock lists while still editing cards inside them.",
+  "author": "Your Name",
+  "icon": {
+    "url": "https://example.com/icon.png",
+    "width": 64,
+    "height": 64
+  }
+}
